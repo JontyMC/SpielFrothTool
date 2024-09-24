@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { useDraggable, useElementSize } from '@vueuse/core'
+import { computed, ref, watch } from 'vue'
+import { useDraggable, useResizeObserver } from '@vueuse/core'
 import { Game } from '../model'
 
 const el = ref<HTMLDivElement>()
@@ -8,39 +8,58 @@ const elInner = ref<HTMLDivElement>()
 
 const props = defineProps<{
   game: Game
-  anchor: HTMLDivElement | undefined
+  anchor: { x: number; y: number } | undefined
 }>()
 
-const {
-  x,
-  y,
-  style: draggableStyle
-} = useDraggable(el, {
+const draggable = useDraggable(el, {
   initialValue: { x: 100, y: 100 },
   handle: elInner
 })
-const { width: ew, height: eh } = useElementSize(el, { width: 100, height: 100 })
 
-const width = ref(100)
-const height = ref(100)
+const dimensions = ref({ width: 100, height: 100 })
+const lineEnding = ref({ x: 100, y: 100 })
 
-onMounted(() => {
-  el.value.style.width = '100px'
-  el.value.style.height = '100px'
-})
+useResizeObserver(el, update)
+watch(draggable.style, update)
 
 const style = computed(() => {
-  return `${draggableStyle.value}background-image: url('${props.game.src}')`
+  return `${draggable.style.value}width: ${dimensions.value.width}px; height: ${dimensions.value.height}px; background-image: url('${props.game.src}')`
 })
+
+function update() {
+  const { width, height, top, left, bottom, right } = el.value!.getBoundingClientRect()
+  dimensions.value = { width, height }
+  lineEnding.value = nearestPointOnRectangle(
+    props.anchor!.x,
+    props.anchor!.y,
+    left + 2,
+    top + 2,
+    right - 2,
+    bottom - 2
+  )
+}
+
+function nearestPointOnRectangle(
+  px: number,
+  py: number,
+  xMin: number,
+  yMin: number,
+  xMax: number,
+  yMax: number
+): { x: number; y: number } {
+  const nearestX = Math.max(xMin, Math.min(px, xMax))
+  const nearestY = Math.max(yMin, Math.min(py, yMax))
+  return { x: nearestX, y: nearestY }
+}
 </script>
 
 <template>
   <svg height="100%" width="100%" class="absolute top-0 left-0 stroke-2 stroke-green-200">
-    <line :x1="x" :y1="y" x2="500" y2="350" />
+    <line :x1="anchor?.x" :y1="anchor?.y" :x2="lineEnding.x" :y2="lineEnding.y" />
   </svg>
   <div
     ref="el"
-    class="absolute resize overflow-auto top-0 left-0 border-4 rounded bg-green-200 border-green-200 bg-contain bg-center bg-no-repeat z-10 p-2"
+    class="absolute resize overflow-auto top-0 left-0 border-4 rounded bg-green-200 border-green-200 bg-cover bg-center bg-no-repeat z-10 p-2"
     :style="style"
   >
     <div ref="elInner" class="h-full"></div>
