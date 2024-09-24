@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, Ref, watch } from 'vue'
+import { ref, computed, Ref, watch, onMounted } from 'vue'
 import {
   useFloating,
   flip,
@@ -9,9 +9,11 @@ import {
   VirtualElement,
   ClientRectObject,
   MaybeElement,
-  computePosition
+  computePosition,
+  detectOverflow
 } from '@floating-ui/vue'
 import { useResizeObserver } from '@vueuse/core'
+import { useDraggable } from '@vueuse/core'
 
 export type Dimensions = {
   top: number
@@ -31,125 +33,104 @@ export type Hall = {
   booths: Booth[]
 }
 
-export type Game = {
-  id: string
-  boothId: string
-  src: string
-}
-
 const hallImageEl = ref<HTMLImageElement>()
-const hallImageDimensions = ref<Dimensions>()
 const tooltipEls = ref<HTMLDivElement[]>()
+const boothEls = ref<HTMLDivElement[]>()
 
 const props = defineProps<{
   hall: Hall
   games: Game[]
 }>()
 
-useResizeObserver(hallImageEl, (entries) => {
-  const entry = entries[0]
-  const { top, left, bottom, right } = entry.contentRect
-  hallImageDimensions.value = { top, left, bottom, right }
-})
-
-const virtualBooths = computed(() =>
-  props.hall.booths.reduce((acc, curr) => {
-    const booth = {
-      getBoundingClientRect(): ClientRectObject {
-        return {
-          x: 200,
-          y: 200,
-          top: 200,
-          left: 500,
-          bottom: 20,
-          right: 20,
-          width: 20,
-          height: 20
-        }
-      }
-    }
-    acc[curr.id] = booth
-    return acc
-  }, <{ [id: string]: VirtualElement }>{})
-)
-
-watch(tooltipEls, (els) => {
-  if (!els) {
+useResizeObserver(hallImageEl, () => {
+  const parent = hallImageEl.value!.getBoundingClientRect()
+  const factor = parent.width / props.hall.width
+  console.log('useResizeObserver', factor, parent)
+  if (!boothEls.value || !tooltipEls.value) {
     return
   }
-  els.forEach(async (el, index) => {
-    const tooltipEl = els[index]
-    const { id, src, boothId } = props.games[index]
-    const booth = virtualBooths.value[boothId]
+  const factoredBooths = props.hall.booths.map(({ id, top, left, bottom, right }) => {
+    const width = (right - left) * factor
+    const height = (bottom - top) * factor
+    top = top * factor
+    left = left * factor
+    bottom = bottom * factor
+    right = right * factor
+    return { id, width, height, top, left, bottom, right }
+  })
+  const virtualBooths = factoredBooths.reduce(
+    (acc, { id, width, height, top, left, bottom, right }) => {
+      const booth = {
+        getBoundingClientRect(): ClientRectObject {
+          return {
+            x: left,
+            y: top,
+            top,
+            left,
+            bottom,
+            right,
+            width,
+            height
+          }
+        }
+      }
+      acc[id] = booth
+      return acc
+    },
+    <{ [id: string]: VirtualElement }>{}
+  )
 
+  tooltipEls.value.forEach(async (tooltipEl, index) => {
+    const { id, src, boothId } = props.games[index]
+    const booth = virtualBooths[boothId]
     const { x, y } = await computePosition(booth, tooltipEl, {
-      middleware: [autoPlacement()]
+      middleware: [autoPlacement(), middleware]
     })
+    const { style } = useDraggable(tooltipEl)
+
     Object.assign(tooltipEl.style, {
       left: `${x}px`,
       top: `${y}px`
     })
   })
+
+  boothEls.value?.map((el, index) => {
+    const { id, width, height, top, left, bottom, right } = factoredBooths[index]
+    Object.assign(el.style, {
+      left: `${left}px`,
+      top: `${top + parent.top}px`,
+      width: `${width}px`,
+      height: `${height}px`
+    })
+  })
 })
 
-// const tooltips = computed(() => {
-//   if (!tooltipEls.value) {
-//     return []
-//   }
-//   props.games.map(({ id, src, boothId }) => {
-//     const booth = virtualBooths.value[id]
-//     const { floatingStyles } = useFloating(booth, floating, {
-//       middleware: [autoPlacement(), shift(), flip()]
-//     })
-//     const tooltipStyles = computed(() => ({
-//       ...floatingStyles.value,
-//       width: '100px',
-//       height: '100px'
-//     }))
-//     return { key: id, src }
-//   })
-// })
-// const tooltips = computed(() => {
-//   if (!tooltipEls.value) {
-//     return []
-//   }
-//   props.games.map(({ id, src, boothId }) => {
-//     const booth = virtualBooths.value[id]
-//     const { floatingStyles } = useFloating(booth, floating, {
-//       middleware: [autoPlacement(), shift(), flip()]
-//     })
-//     const tooltipStyles = computed(() => ({
-//       ...floatingStyles.value,
-//       width: '100px',
-//       height: '100px'
-//     }))
-//     return { key: id, src }
-//   })
-// })
+const middleware = {
+  name: 'middleware',
+  async fn(state) {
+    const overflow = await detectOverflow(state, { boundary: tooltipEls.value })
+    console.log(overflow)
+    return {}
+  }
+}
 
-//  tooltips.value.forEach((tooltip, index) => {
-//     const tooltipEl = tooltipRefs.value[index];
+const test = ref<HTMLDivElement>()
 
-//     // Create a virtual element based on the coordinates from the tooltip object
-//     const virtualElement = createVirtualElement(tooltip);
-
-//     // Use Floating UI to position the tooltip
-//     computePosition(virtualElement, tooltipEl, {
-//       middleware: [flip(), shift()],
-//     }).then(({ x, y }) => {
-//       Object.assign(tooltipEl.style, {
-//         position: 'absolute',
-//         left: `${x}px`,
-//         top: `${y}px`,
-//       });
-//     });
-//   });
+const { x, y, style } = useDraggable(test, {
+  initialValue: { x: 40, y: 40 }
+})
 </script>
 
 <template>
   <div ref="hallImageEl">
     <img src="../resources/hall3.jpg" />
   </div>
+  <div
+    ref="test"
+    :style="style"
+    class="bg-red-400"
+    style="width: 100px; height: 100px; position: fixed"
+  ></div>
   <div
     ref="tooltipEls"
     v-for="game in props.games"
@@ -159,4 +140,10 @@ watch(tooltipEls, (els) => {
   >
     <img :src="game.src" />
   </div>
+  <div
+    ref="boothEls"
+    v-for="booth in props.hall.booths"
+    :key="booth.id"
+    class="absolute border-2 border-red-600"
+  ></div>
 </template>
