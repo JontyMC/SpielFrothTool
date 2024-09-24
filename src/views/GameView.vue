@@ -20,22 +20,35 @@ const dimensions = ref({ width: 100, height: 100 })
 const lineEnding = ref({ x: 100, y: 100 })
 
 useResizeObserver(el, update)
-watch(draggable.style, update)
+watch(draggable.position, update)
 
 const style = computed(() => {
-  return `${draggable.style.value}width: ${dimensions.value.width}px; height: ${dimensions.value.height}px; background-image: url('${props.game.src}')`
+  if (!el.value) {
+    return
+  }
+  const parent = el.value.parentElement!.getBoundingClientRect()!
+  const adjustedLeft = draggable.x.value - parent.left
+  const adjustedTop = draggable.y.value - parent.top
+  return {
+    left: `${adjustedLeft}px`,
+    top: `${adjustedTop}px`,
+    width: `${dimensions.value.width}px`,
+    height: `${dimensions.value.height}px`,
+    backgroundImage: `url('${props.game.src}')`
+  }
 })
 
 function update() {
   const { width, height, top, left, bottom, right } = el.value!.getBoundingClientRect()
+  const parent = el.value!.parentElement!.getBoundingClientRect()!
   dimensions.value = { width, height }
   lineEnding.value = nearestPointOnRectangle(
     props.anchor!.x,
     props.anchor!.y,
-    left + 2,
-    top + 2,
+    left + 2 - parent.left,
+    top + 2 - parent.top,
     right - 2,
-    bottom - 2
+    bottom - 2 - parent.top
   )
 }
 
@@ -47,6 +60,8 @@ function nearestPointOnRectangle(
   xMax: number,
   yMax: number
 ): { x: number; y: number } {
+  console.log('up', arguments)
+
   const nearestX = Math.max(xMin, Math.min(px, xMax))
   const nearestY = Math.max(yMin, Math.min(py, yMax))
   return { x: nearestX, y: nearestY }

@@ -20,5 +20,4 @@ export type Hall = {
   width: number
   height: number
   booths: Booth[]
-  games: Game[]
 }

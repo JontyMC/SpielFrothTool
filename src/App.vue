@@ -9,6 +9,8 @@ import {
   MenuItems
 } from '@headlessui/vue'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import axios from 'axios'
+import { onMounted } from 'vue'
 
 const navigation = [
   { name: 'Dashboard', href: '#', current: true },
@@ -16,6 +18,17 @@ const navigation = [
   { name: 'Projects', href: '#', current: false },
   { name: 'Calendar', href: '#', current: false }
 ]
+
+async function loadData() {
+  const url =
+    'https://tabletoptogether.com/tool/share.php?key=3ec71aebba638f3296802760cf3c6ff7&c=29'
+  const { status, data } = await axios.request<string>({
+    method: 'get',
+    url,
+    validateStatus: () => true
+  })
+  var t = status
+}
 </script>
 
 <template>
@@ -150,6 +163,16 @@ const navigation = [
     </DisclosurePanel>
   </Disclosure>
   <main>
+    <div class="d-flex p-2">
+      <input class="mr-2" type="text" placeholder="Tabletop ID" />
+      <button
+        type="button"
+        @click="loadData()"
+        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+      >
+        Load
+      </button>
+    </div>
     <router-view v-slot="{ Component }">
       <keep-alive>
         <component :is="Component" />
