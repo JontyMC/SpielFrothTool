@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { computed, Ref, ref } from 'vue'
-import { useDraggable } from '@vueuse/core'
+import { computed, onMounted, ref, watch } from 'vue'
+import { useDraggable, useElementSize } from '@vueuse/core'
 import { Game } from '../model'
 
 const el = ref<HTMLDivElement>()
+const elInner = ref<HTMLDivElement>()
 
 const props = defineProps<{
   game: Game
@@ -15,13 +16,22 @@ const {
   y,
   style: draggableStyle
 } = useDraggable(el, {
-  initialValue: { x: 40, y: 40 }
+  initialValue: { x: 100, y: 100 },
+  handle: elInner
+})
+const { width: ew, height: eh } = useElementSize(el, { width: 100, height: 100 })
+
+const width = ref(100)
+const height = ref(100)
+
+onMounted(() => {
+  el.value.style.width = '100px'
+  el.value.style.height = '100px'
 })
 
-const style = computed(
-  () =>
-    `${draggableStyle.value}width: 100px; height: 101px; background-image: url('${props.game.src}')`
-)
+const style = computed(() => {
+  return `${draggableStyle.value}background-image: url('${props.game.src}')`
+})
 </script>
 
 <template>
@@ -30,7 +40,9 @@ const style = computed(
   </svg>
   <div
     ref="el"
-    class="absolute top-0 left-0 border-4 rounded bg-green-200 border-green-200 bg-cover bg-center bg-no-repeat z-10"
+    class="absolute resize overflow-auto top-0 left-0 border-4 rounded bg-green-200 border-green-200 bg-contain bg-center bg-no-repeat z-10 p-2"
     :style="style"
-  ></div>
+  >
+    <div ref="elInner" class="h-full"></div>
+  </div>
 </template>
