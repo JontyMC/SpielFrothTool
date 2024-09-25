@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 import GameView from './GameView.vue'
 import { Booth, Game } from '../model'
 import { boothTool } from '../state'

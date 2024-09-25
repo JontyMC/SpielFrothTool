@@ -7,10 +7,18 @@ import {
   XMarkIcon,
   InformationCircleIcon
 } from '@heroicons/vue/24/outline'
-import axios from 'axios'
-import data from './data.json'
 import { onMounted } from 'vue'
-import { boothTool, info, likes, loadGames, needs, wants } from './state'
+import {
+  boothTool,
+  info,
+  likes,
+  loadGames,
+  needs,
+  resetGames,
+  saveGames,
+  userId,
+  wants
+} from './state'
 
 const navigation = [
   { name: 'Hall 1', href: '#', current: true },
@@ -23,24 +31,9 @@ const navigation = [
 ]
 
 onMounted(() => {
-  loadGames('1990e9fa56c4e74f80b0e6819775d98f')
+  userId.value = '1990e9fa56c4e74f80b0e6819775d98f'
+  loadGames(false)
 })
-
-async function loadData() {
-  //const url = 'https://tabletoptogether.com/tool/share.php?key=3ec71aebba638f3296802760cf3c6ff7&c=29'
-  // const id = '3ec71aebba638f3296802760cf3c6ff7'
-  // const url = 'http://localhost:7124/api/data/' + id
-  // const { status, data } = await axios.request<string>({
-  //   method: 'get',
-  //   url,
-  //   validateStatus: () => true
-  // })
-  loadGames('1990e9fa56c4e74f80b0e6819775d98f', data)
-}
-
-function saveData() {}
-
-function resetData() {}
 
 function toggleInfo() {
   info.value = !info.value
@@ -114,6 +107,14 @@ function toggleBoothTool() {
           <button
             type="button"
             class="mr-1 relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+            @click="toggleInfo()"
+          >
+            <span class="absolute -inset-1.5" />
+            <InformationCircleIcon class="h-6 w-6" aria-hidden="true" />
+          </button>
+          <button
+            type="button"
+            class="mr-1 relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
             @click="toggleBoothTool()"
           >
             <span class="absolute -inset-1.5" />
@@ -145,35 +146,27 @@ function toggleBoothTool() {
   </Disclosure>
   <main>
     <div class="flex flex-wrap justify-center align-center p-2 mb-2">
-      <input class="mr-2" type="text" placeholder="Tabletop ID" />
+      <input class="mr-2" type="text" v-model="userId" placeholder="Tabletop Together ID" />
       <button
         type="button"
-        @click="loadData()"
+        @click="loadGames(true)"
         class="mr-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
       >
         Load
       </button>
       <button
         type="button"
-        @click="saveData()"
+        @click="saveGames()"
         class="mr-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
       >
         Save
       </button>
       <button
         type="button"
-        @click="resetData()"
+        @click="resetGames()"
         class="mr-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
       >
         Reset
-      </button>
-      <button
-        type="button"
-        class="mr-4 relative rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-offset-2"
-        @click="toggleInfo()"
-      >
-        <span class="absolute -inset-1.5" />
-        <InformationCircleIcon class="h-6 w-6" aria-hidden="true" />
       </button>
       <label class="inline-flex items-center cursor-pointer mr-2">
         <input type="checkbox" v-model="needs" class="sr-only peer" />

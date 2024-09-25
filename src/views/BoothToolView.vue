@@ -54,7 +54,6 @@ onMounted(() => {
   const ctx = canvas.getContext('2d')!
   const canvasWidth = canvas.clientWidth
   const canvasHeight = canvas.clientHeight
-  console.log('canvas', canvasWidth, canvasHeight)
   canvas.width = canvasWidth
   canvas.height = canvasHeight
   ctx.strokeStyle = 'blue'

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import HallView from './HallView.vue'
 import { halls, gamesByHall } from '../state'
-import { computed } from 'vue'
+import { computed, watch } from 'vue'
 
 const hallId = '3'
 const games = computed(() => gamesByHall.value[hallId] ?? [])

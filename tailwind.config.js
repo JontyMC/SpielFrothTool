@@ -12,7 +12,7 @@ export default {
   plugins: [require('@tailwindcss/forms'), require('flowbite/plugin')],
   safelist: [
     {
-      pattern: /bg-(green|amber|blue)-(200|300)/
+      pattern: /(bg|border|stroke)-(green|amber|blue)-(200|300)/
     }
   ]
 }

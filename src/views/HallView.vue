@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { Game, Hall, priorityOrder } from '../model'
 import BoothView from './BoothView.vue'
 import BoothToolView from './BoothToolView.vue'
 import { useResizeObserver } from '@vueuse/core'
-import { booths, boothsByHall, boothTool, likes, needs, wants } from '../state'
+import { booths, boothsByHall, boothTool, info, likes, needs, wants } from '../state'
 
 const el = ref<HTMLImageElement>()
 
@@ -57,7 +57,7 @@ function getFactor() {
 <template>
   <div class="relative flex justify-center" ref="el">
     <img src="../resources/hall3.jpg" />
-    <div class="absolute top-0 left-0 p-2">
+    <div v-if="info" class="absolute top-0 left-0 p-2">
       <ul>
         <li v-for="game in gameList" :class="`mb-2 p-1 bg-${game.color}`">
           <strong>
