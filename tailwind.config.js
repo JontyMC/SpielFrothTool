@@ -9,5 +9,10 @@ export default {
       }
     }
   },
-  plugins: [require('@tailwindcss/forms')]
+  plugins: [require('@tailwindcss/forms')],
+  safelist: [
+    {
+      pattern: /bg-(green|amber|blue)-(200|300)/
+    }
+  ]
 }

@@ -28,3 +28,19 @@ coverage
 *.sw?
 
 *.tsbuildinfo
+.vs/
+.idea/
+bin/
+obj/
+*.user
+*.pubxml
+*.jfm
+*.dbmdl
+local.settings.json
+local.settings.*.json
+appSettings.json
+appSettings.*.json
+packages/
+azure.auth
+.vscode/launch.json
+.local-chromium

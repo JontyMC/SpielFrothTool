@@ -1,33 +1,36 @@
 <script setup lang="ts">
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems
-} from '@headlessui/vue'
+import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import axios from 'axios'
+import data from './data.json'
 import { onMounted } from 'vue'
+import { gameId } from './model'
+import { loadGames } from './state'
 
 const navigation = [
-  { name: 'Dashboard', href: '#', current: true },
-  { name: 'Team', href: '#', current: false },
-  { name: 'Projects', href: '#', current: false },
-  { name: 'Calendar', href: '#', current: false }
+  { name: 'Hall 1', href: '#', current: true },
+  { name: 'Hall 2', href: '#', current: false },
+  { name: 'Hall 3', href: '#', current: false },
+  { name: 'Hall 4', href: '#', current: false },
+  { name: 'Hall 5', href: '#', current: false },
+  { name: 'Hall 6', href: '#', current: false },
+  { name: 'Hall 7', href: '#', current: false }
 ]
 
+onMounted(() => {
+  loadGames('1990e9fa56c4e74f80b0e6819775d98f')
+})
+
 async function loadData() {
-  const url =
-    'https://tabletoptogether.com/tool/share.php?key=3ec71aebba638f3296802760cf3c6ff7&c=29'
-  const { status, data } = await axios.request<string>({
-    method: 'get',
-    url,
-    validateStatus: () => true
-  })
-  var t = status
+  //const url = 'https://tabletoptogether.com/tool/share.php?key=3ec71aebba638f3296802760cf3c6ff7&c=29'
+  // const id = '3ec71aebba638f3296802760cf3c6ff7'
+  // const url = 'http://localhost:7124/api/data/' + id
+  // const { status, data } = await axios.request<string>({
+  //   method: 'get',
+  //   url,
+  //   validateStatus: () => true
+  // })
+  loadGames('1990e9fa56c4e74f80b0e6819775d98f', data)
 }
 </script>
 
@@ -84,60 +87,16 @@ async function loadData() {
             <span class="sr-only">View notifications</span>
             <BellIcon class="h-6 w-6" aria-hidden="true" />
           </button>
-
-          <!-- Profile dropdown -->
-          <Menu as="div" class="relative ml-3">
-            <div>
-              <MenuButton
-                class="relative flex rounded-full bg-gray-800 text-sm focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-              >
-                <span class="absolute -inset-1.5" />
-                <span class="sr-only">Open user menu</span>
-                <img
-                  class="h-8 w-8 rounded-full"
-                  src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                  alt=""
-                />
-              </MenuButton>
-            </div>
-            <transition
-              enter-active-class="transition ease-out duration-100"
-              enter-from-class="transform opacity-0 scale-95"
-              enter-to-class="transform opacity-100 scale-100"
-              leave-active-class="transition ease-in duration-75"
-              leave-from-class="transform opacity-100 scale-100"
-              leave-to-class="transform opacity-0 scale-95"
+          <div class="d-flex p-2">
+            <input class="mr-2" type="text" placeholder="Tabletop ID" />
+            <button
+              type="button"
+              @click="loadData()"
+              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
             >
-              <MenuItems
-                class="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-              >
-                <MenuItem v-slot="{ active }">
-                  <a
-                    href="#"
-                    :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"
-                  >
-                    Your Profile
-                  </a>
-                </MenuItem>
-                <MenuItem v-slot="{ active }">
-                  <a
-                    href="#"
-                    :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"
-                  >
-                    Settings
-                  </a>
-                </MenuItem>
-                <MenuItem v-slot="{ active }">
-                  <a
-                    href="#"
-                    :class="[active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700']"
-                  >
-                    Sign out
-                  </a>
-                </MenuItem>
-              </MenuItems>
-            </transition>
-          </Menu>
+              Load
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -163,16 +122,6 @@ async function loadData() {
     </DisclosurePanel>
   </Disclosure>
   <main>
-    <!-- <div class="d-flex p-2">
-      <input class="mr-2" type="text" placeholder="Tabletop ID" />
-      <button
-        type="button"
-        @click="loadData()"
-        class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-      >
-        Load
-      </button>
-    </div> -->
     <router-view v-slot="{ Component }">
       <keep-alive>
         <component :is="Component" />

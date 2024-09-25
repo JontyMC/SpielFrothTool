@@ -1,40 +1,41 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import GameView from './GameView.vue'
-import { BoothData } from './HallView.vue'
+import { Booth, Game } from '../model'
 
 const el = ref<HTMLDivElement[]>()
 
 const props = defineProps<{
-  data: BoothData
+  booth: Booth
+  games: Game[]
   factor: number
 }>()
 
 const factoredBooth = computed(() => {
   const factor = props.factor
-  let { top, left, bottom, right } = props.data.booth
-  const width = (right - left) * factor
-  const height = (bottom - top) * factor
-  top = top * factor
-  left = left * factor
-  bottom = bottom * factor
-  right = right * factor
+  let { x, y, width, height } = props.booth
+  width = width * factor
+  height = height * factor
+  x = x * factor
+  y = y * factor
   console.log('factoredBooth', factor)
   return {
     width,
     height,
-    top,
-    left,
-    x: left + width / 2,
-    y: top + height / 2
+    x,
+    y,
+    center: {
+      x: x + width / 2,
+      y: y + height / 2
+    }
   }
 })
 
 const style = computed(() => {
-  const { width, height, top, left } = factoredBooth.value
+  const { width, height, x, y } = factoredBooth.value
   return {
-    left: `${left}px`,
-    top: `${top}px`,
+    left: `${x}px`,
+    top: `${y}px`,
     width: `${width}px`,
     height: `${height}px`
   }
@@ -44,6 +45,6 @@ const style = computed(() => {
 <template>
   <div class="absolute top-0 left-0 w-full h-full">
     <div ref="el" class="absolute border-2 border-red-600" :style="style"></div>
-    <GameView v-for="game of data.games" :game="game" :anchor="factoredBooth" :factor="factor" />
+    <GameView v-for="game of games" :game="game" :anchor="factoredBooth.center" :factor="factor" />
   </div>
 </template>

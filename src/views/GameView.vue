@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
-import { Game } from '../model'
+import { Game, Position } from '../model'
+import { saveGame } from '../state'
 
 const props = defineProps<{
   game: Game
@@ -8,27 +9,32 @@ const props = defineProps<{
   factor: number
 }>()
 
-const dimensions = ref({ x: 100, y: 100, width: 100, height: 100 })
+const position = ref<Position>({ x: 100, y: 100, width: 100, height: 100 })
 const factoredDimensions = computed(() => ({
-  x: dimensions.value.x * props.factor,
-  y: dimensions.value.y * props.factor,
-  width: dimensions.value.width * props.factor,
-  height: dimensions.value.height * props.factor
+  x: position.value.x * props.factor,
+  y: position.value.y * props.factor,
+  width: position.value.width * props.factor,
+  height: position.value.height * props.factor
 }))
 
 onMounted(() => {
-  const x = props.anchor.x / props.factor + 80
-  const y = props.anchor.y / props.factor - 150
-  dimensions.value = { x, y, width: 120, height: 120 }
+  const init = props.game.position
+  const x = (init?.x ?? props.anchor.x + 80) / props.factor
+  const y = (init?.y ?? props.anchor.y - 150) / props.factor
+  const width = (init?.width ?? 150) / props.factor
+  const height = (init?.height ?? 150) / props.factor
+  position.value = { x, y, width, height }
 })
 
+watch(position, () => saveGame({ ...props.game, position: position.value }))
+
 function drag(x: number, y: number) {
-  const { width, height } = dimensions.value
-  dimensions.value = { x: x / props.factor, y: y / props.factor, width, height }
+  const { width, height } = position.value
+  position.value = { x: x / props.factor, y: y / props.factor, width, height }
 }
 
 function resize(handle: string, x: number, y: number, width: number, height: number) {
-  dimensions.value = {
+  position.value = {
     x: x / props.factor,
     y: y / props.factor,
     width: width / props.factor,
@@ -41,7 +47,10 @@ const lineEnding = computed(() => {
   const nearestY = Math.max(y + 2, Math.min(props.anchor.y, y + height) - 2)
   return { x: nearestX, y: nearestY }
 })
-const style = computed(() => ({ backgroundImage: `url('${props.game.src}')`, zIndex: 10 }))
+const style = computed(() => ({
+  backgroundImage: `url('https://tabletoptogether.com/tool/${props.game.src}')`,
+  zIndex: 10
+}))
 </script>
 
 <template>
