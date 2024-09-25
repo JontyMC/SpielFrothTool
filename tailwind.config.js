@@ -1,7 +1,7 @@
 const defaultTheme = require('tailwindcss/defaultTheme')
 
 export default {
-  content: ['./index.html', './src/**/*.{vue,ts}'],
+  content: ['./index.html', './src/**/*.{vue,ts}', './node_modules/flowbite/**/*.js'],
   theme: {
     extend: {
       fontFamily: {
@@ -9,7 +9,7 @@ export default {
       }
     }
   },
-  plugins: [require('@tailwindcss/forms')],
+  plugins: [require('@tailwindcss/forms'), require('flowbite/plugin')],
   safelist: [
     {
       pattern: /bg-(green|amber|blue)-(200|300)/

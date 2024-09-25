@@ -2,6 +2,7 @@
 import { computed, ref } from 'vue'
 import GameView from './GameView.vue'
 import { Booth, Game } from '../model'
+import { boothTool } from '../state'
 
 const el = ref<HTMLDivElement[]>()
 
@@ -18,7 +19,6 @@ const factoredBooth = computed(() => {
   height = height * factor
   x = x * factor
   y = y * factor
-  console.log('factoredBooth', factor)
   return {
     width,
     height,
@@ -44,7 +44,7 @@ const style = computed(() => {
 
 <template>
   <div class="absolute top-0 left-0 w-full h-full">
-    <div ref="el" class="absolute border-2 border-red-600" :style="style"></div>
+    <div v-if="boothTool" ref="el" class="absolute border-2 border-red-600" :style="style"></div>
     <GameView v-for="game of games" :game="game" :anchor="factoredBooth.center" :factor="factor" />
   </div>
 </template>

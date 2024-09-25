@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
-import { Bars3Icon, BellIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import {
+  Bars3Icon,
+  WrenchIcon,
+  PrinterIcon,
+  XMarkIcon,
+  InformationCircleIcon
+} from '@heroicons/vue/24/outline'
 import axios from 'axios'
 import data from './data.json'
 import { onMounted } from 'vue'
-import { gameId } from './model'
-import { loadGames } from './state'
+import { boothTool, info, likes, loadGames, needs, wants } from './state'
 
 const navigation = [
   { name: 'Hall 1', href: '#', current: true },
@@ -31,6 +36,25 @@ async function loadData() {
   //   validateStatus: () => true
   // })
   loadGames('1990e9fa56c4e74f80b0e6819775d98f', data)
+}
+
+function saveData() {}
+
+function resetData() {}
+
+function toggleInfo() {
+  info.value = !info.value
+}
+
+function print() {
+  window.open(
+    'https://chromewebstore.google.com/detail/gofullpage-full-page-scre/fdpohaocaechififmbbbbbknoalclacl?hl=en',
+    '_blank'
+  )
+}
+
+function toggleBoothTool() {
+  boothTool.value = !boothTool.value
 }
 </script>
 
@@ -81,22 +105,20 @@ async function loadData() {
         >
           <button
             type="button"
-            class="relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+            class="mr-1 relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+            @click="print()"
           >
             <span class="absolute -inset-1.5" />
-            <span class="sr-only">View notifications</span>
-            <BellIcon class="h-6 w-6" aria-hidden="true" />
+            <PrinterIcon class="h-6 w-6" aria-hidden="true" />
           </button>
-          <div class="d-flex p-2">
-            <input class="mr-2" type="text" placeholder="Tabletop ID" />
-            <button
-              type="button"
-              @click="loadData()"
-              class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
-            >
-              Load
-            </button>
-          </div>
+          <button
+            type="button"
+            class="mr-1 relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
+            @click="toggleBoothTool()"
+          >
+            <span class="absolute -inset-1.5" />
+            <WrenchIcon class="h-6 w-6" aria-hidden="true" />
+          </button>
         </div>
       </div>
     </div>
@@ -122,6 +144,59 @@ async function loadData() {
     </DisclosurePanel>
   </Disclosure>
   <main>
+    <div class="flex flex-wrap justify-center align-center p-2 mb-2">
+      <input class="mr-2" type="text" placeholder="Tabletop ID" />
+      <button
+        type="button"
+        @click="loadData()"
+        class="mr-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+      >
+        Load
+      </button>
+      <button
+        type="button"
+        @click="saveData()"
+        class="mr-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+      >
+        Save
+      </button>
+      <button
+        type="button"
+        @click="resetData()"
+        class="mr-4 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+      >
+        Reset
+      </button>
+      <button
+        type="button"
+        class="mr-4 relative rounded-full p-1 focus:outline-none focus:ring-2 focus:ring-offset-2"
+        @click="toggleInfo()"
+      >
+        <span class="absolute -inset-1.5" />
+        <InformationCircleIcon class="h-6 w-6" aria-hidden="true" />
+      </button>
+      <label class="inline-flex items-center cursor-pointer mr-2">
+        <input type="checkbox" v-model="needs" class="sr-only peer" />
+        <div
+          class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-green-200"
+        ></div>
+        <span class="ms-1 text-sm font-medium text-gray-900 dark:text-gray-300">Needs</span>
+      </label>
+      <label class="inline-flex items-center cursor-pointer mr-2">
+        <input type="checkbox" v-model="wants" value="" class="sr-only peer" />
+        <div
+          class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-300"
+        ></div>
+        <span class="ms-1 text-sm font-medium text-gray-900 dark:text-gray-300">Wants</span>
+      </label>
+      <label class="inline-flex items-center cursor-pointer mr-2">
+        <input type="checkbox" v-model="likes" value="" class="sr-only peer" />
+        <div
+          class="relative w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-amber-300"
+        ></div>
+        <span class="ms-1 text-sm font-medium text-gray-900 dark:text-gray-300">Likes</span>
+      </label>
+    </div>
     <router-view v-slot="{ Component }">
       <keep-alive>
         <component :is="Component" />

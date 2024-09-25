@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Game, Hall, priorityOrder, sortStrings } from '../model'
+import { Game, Hall, priorityOrder } from '../model'
 import BoothView from './BoothView.vue'
+import BoothToolView from './BoothToolView.vue'
 import { useResizeObserver } from '@vueuse/core'
-import { booths, boothsByHall } from '../state'
+import { booths, boothsByHall, boothTool, likes, needs, wants } from '../state'
 
 const el = ref<HTMLImageElement>()
 
@@ -12,8 +13,17 @@ const props = defineProps<{
   games: Game[]
 }>()
 
+const filteredGames = computed(() =>
+  props.games.filter(
+    (x) =>
+      (needs.value || x.priority !== 'need') &&
+      (wants.value || x.priority !== 'want') &&
+      (likes.value || x.priority !== 'like')
+  )
+)
+
 const gamesByBooth = computed(() =>
-  props.games.reduce((acc, curr) => {
+  filteredGames.value.reduce((acc, curr) => {
     const games = acc[curr.boothId] ?? []
     games.push(curr)
     acc[curr.boothId] = games
@@ -21,7 +31,7 @@ const gamesByBooth = computed(() =>
   }, <{ [id: string]: Game[] }>{})
 )
 const gameList = computed(() =>
-  props.games
+  filteredGames.value
     .sort((a, b) => {
       if (a.priority === b.priority) {
         return a.name.localeCompare(b.name)
@@ -41,7 +51,6 @@ onMounted(() => {
 function getFactor() {
   const parent = el.value!.getBoundingClientRect()
   factor.value = parent.width / props.hall.width
-  console.log('getFactor', factor.value)
 }
 </script>
 
@@ -63,6 +72,7 @@ function getFactor() {
         </li>
       </ul>
     </div>
+    <BoothToolView v-if="boothTool" :hall-id="hall.id" :factor="factor" />
     <BoothView
       v-for="booth in boothsByHall[hall.id]"
       :key="booth.id"

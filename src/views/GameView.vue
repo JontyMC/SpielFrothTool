@@ -41,12 +41,14 @@ function resize(handle: string, x: number, y: number, width: number, height: num
     height: height / props.factor
   }
 }
+
 const lineEnding = computed(() => {
   const { x, y, width, height } = factoredDimensions.value
   const nearestX = Math.max(x + 2, Math.min(props.anchor.x, x + width) - 2)
   const nearestY = Math.max(y + 2, Math.min(props.anchor.y, y + height) - 2)
   return { x: nearestX, y: nearestY }
 })
+
 const style = computed(() => ({
   backgroundImage: `url('https://tabletoptogether.com/tool/${props.game.src}')`,
   zIndex: 10
@@ -54,7 +56,7 @@ const style = computed(() => ({
 </script>
 
 <template>
-  <svg height="100%" width="100%" class="absolute top-0 left-0 stroke-green-200">
+  <svg height="100%" width="100%" :class="`absolute top-0 left-0 stroke-${game.color}`">
     <line :x1="anchor.x" :y1="anchor.y" :x2="lineEnding.x" :y2="lineEnding.y" stroke-width="4" />
   </svg>
   <vue-draggable-resizable
@@ -64,7 +66,7 @@ const style = computed(() => ({
     :y="factoredDimensions.y"
     :w="factoredDimensions.width"
     :h="factoredDimensions.height"
-    class-name="absolute border-4 rounded bg-green-200 border-green-200 bg-cover bg-center bg-no-repeat p-2"
+    :class-name="`absolute border-4 rounded bg-${game.color} border-${game.color} bg-cover bg-center bg-no-repeat p-2`"
     :style="style"
   ></vue-draggable-resizable>
 </template>
