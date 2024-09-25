@@ -13,7 +13,9 @@ const { pressed } = useMousePressed({ target: el })
 const { x, y } = useMouse({ target: el })
 const currentPosition = computed(() => ({ x: x.value, y: y.value }))
 const startPosition = ref<Position>()
-const offset = computed(() => el.value?.getBoundingClientRect().top)
+const offset = computed(() => {
+  return el.value?.getBoundingClientRect().top
+})
 
 watch(pressed, (value) => {
   if (value) {
@@ -32,7 +34,7 @@ watch(pressed, (value) => {
   }
 })
 
-watch(currentPosition, (position) => {
+watch(currentPosition, () => {
   if (pressed.value) {
     const canvas = el.value!
     const ctx = canvas.getContext('2d')!

@@ -1,8 +1,11 @@
 import { createMemoryHistory, createRouter } from 'vue-router'
 
-import Hall3View from './views/Hall3View.vue'
+import HallView from './views/HallView.vue'
 
-const routes = [{ path: '/', component: Hall3View }]
+const routes = [
+  { path: '/', redirect: '/3' },
+  { path: '/:id', component: HallView, props: true }
+]
 
 const router = createRouter({
   history: createMemoryHistory(),

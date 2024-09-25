@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { Game, Position } from '../model'
-import { savePosition } from '../state'
+import { imagePrefix } from '../state'
 
 const props = defineProps<{
   game: Game
@@ -34,6 +34,23 @@ watch(
   { immediate: true }
 )
 
+onMounted(() => {
+  if (!props.game.srcInit) {
+    props.game.srcInit = true
+    const img = new Image()
+    img.src = imagePrefix + props.game.src
+
+    img.onload = () => {
+      const defaultWidth = 150 * props.factor
+      const ratio = img.naturalWidth / img.naturalHeight
+      const width = ratio <= 1 ? defaultWidth * ratio : defaultWidth
+      const height = ratio >= 1 ? defaultWidth * ratio : defaultWidth
+      const { x, y } = factoredPosition.value
+      setPosition(x, y, width, height)
+    }
+  }
+})
+
 function setPosition(x: number, y: number, width: number, height: number) {
   x = x / props.factor
   y = y / props.factor
@@ -41,7 +58,7 @@ function setPosition(x: number, y: number, width: number, height: number) {
   height = height / props.factor
   const newPosition = { x, y, width, height }
   position.value = newPosition
-  savePosition(props.game.id, newPosition)
+  props.game.position = newPosition
 }
 
 function drag(x: number, y: number) {
@@ -61,7 +78,7 @@ const lineEnding = computed(() => {
 })
 
 const style = computed(() => ({
-  backgroundImage: `url('https://tabletoptogether.com/tool/${props.game.src}')`,
+  backgroundImage: `url('${imagePrefix}${props.game.src}')`,
   zIndex: 10
 }))
 </script>

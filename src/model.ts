@@ -11,6 +11,7 @@ export type Game = {
   hallId: string
   src: string
   position?: Position
+  srcInit: boolean
 }
 
 export type Position = {

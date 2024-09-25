@@ -1,15 +1,11 @@
 <script setup lang="ts">
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
-import {
-  Bars3Icon,
-  WrenchIcon,
-  PrinterIcon,
-  XMarkIcon,
-  InformationCircleIcon
-} from '@heroicons/vue/24/outline'
-import { onMounted } from 'vue'
+import { Bars3Icon, WrenchIcon, PrinterIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { computed, onMounted } from 'vue'
 import {
   boothTool,
+  gamesByHall,
+  halls,
   info,
   likes,
   loadGames,
@@ -19,25 +15,24 @@ import {
   userId,
   wants
 } from './state'
+import { useRoute } from 'vue-router'
 
-const navigation = [
-  { name: 'Hall 1', href: '#', current: true },
-  { name: 'Hall 2', href: '#', current: false },
-  { name: 'Hall 3', href: '#', current: false },
-  { name: 'Hall 4', href: '#', current: false },
-  { name: 'Hall 5', href: '#', current: false },
-  { name: 'Hall 6', href: '#', current: false },
-  { name: 'Hall 7', href: '#', current: false }
-]
+const navigation = computed(() =>
+  Object.values(halls)
+    .sort((a, b) => a.id.localeCompare(b.id))
+    .map((x) => ({ name: 'Hall ' + x.id, route: x.id, count: gamesByHall.value[x.id]?.length }))
+)
 
 onMounted(() => {
+  if (window.innerWidth > 1200 && !localStorage.getItem('info')) {
+    info.value = true
+  }
   userId.value = '1990e9fa56c4e74f80b0e6819775d98f'
   loadGames(false)
 })
 
-function toggleInfo() {
-  info.value = !info.value
-}
+const route = useRoute()
+const gameCount = computed(() => gamesByHall.value[route.params.id as string]?.length)
 
 function print() {
   window.open(
@@ -76,20 +71,21 @@ function toggleBoothTool() {
           </div>
           <div class="hidden sm:ml-6 sm:block">
             <div class="flex space-x-4">
-              <a
+              <RouterLink
                 v-for="item in navigation"
                 :key="item.name"
-                :href="item.href"
-                :class="[
-                  item.current
-                    ? 'bg-gray-900 text-white'
-                    : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                  'rounded-md px-3 py-2 text-sm font-medium'
-                ]"
-                :aria-current="item.current ? 'page' : undefined"
+                :to="item.route"
+                class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
+                activeClass="bg-gray-900 text-white"
               >
                 {{ item.name }}
-              </a>
+                <span
+                  v-if="item.count > 0"
+                  class="inline-flex items-center justify-center w-4 h-4 ms-2 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full"
+                >
+                  {{ item.count }}
+                </span>
+              </RouterLink>
             </div>
           </div>
         </div>
@@ -103,14 +99,6 @@ function toggleBoothTool() {
           >
             <span class="absolute -inset-1.5" />
             <PrinterIcon class="h-6 w-6" aria-hidden="true" />
-          </button>
-          <button
-            type="button"
-            class="mr-1 relative rounded-full bg-gray-800 p-1 text-gray-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-gray-800"
-            @click="toggleInfo()"
-          >
-            <span class="absolute -inset-1.5" />
-            <InformationCircleIcon class="h-6 w-6" aria-hidden="true" />
           </button>
           <button
             type="button"
@@ -129,15 +117,10 @@ function toggleBoothTool() {
         <DisclosureButton
           v-for="item in navigation"
           :key="item.name"
-          as="a"
-          :href="item.href"
-          :class="[
-            item.current
-              ? 'bg-gray-900 text-white'
-              : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-            'block rounded-md px-3 py-2 text-base font-medium'
-          ]"
-          :aria-current="item.current ? 'page' : undefined"
+          as="RouterLink"
+          :to="item.route"
+          class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
+          activeClass="bg-gray-900 text-white"
         >
           {{ item.name }}
         </DisclosureButton>
@@ -146,6 +129,15 @@ function toggleBoothTool() {
   </Disclosure>
   <main>
     <div class="flex flex-wrap justify-center align-center p-2 mb-2">
+      <label class="inline-flex items-center cursor-pointer mr-3">
+        <input type="checkbox" v-model="info" class="sr-only peer" />
+        <div
+          class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+        ></div>
+        <span class="ms-1 text-sm font-medium text-gray-900 dark:text-gray-300">
+          Game Info ({{ gameCount ?? 0 }} games)
+        </span>
+      </label>
       <input class="mr-2" type="text" v-model="userId" placeholder="Tabletop Together ID" />
       <button
         type="button"

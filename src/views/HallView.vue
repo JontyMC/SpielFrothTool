@@ -1,20 +1,31 @@
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from 'vue'
-import { Game, Hall, priorityOrder } from '../model'
+import { computed, onMounted, ref } from 'vue'
+import { Game, priorityOrder } from '../model'
 import BoothView from './BoothView.vue'
 import BoothToolView from './BoothToolView.vue'
 import { useResizeObserver } from '@vueuse/core'
-import { booths, boothsByHall, boothTool, info, likes, needs, wants } from '../state'
+import {
+  booths,
+  boothsByHall,
+  boothTool,
+  gamesByHall,
+  halls,
+  info,
+  likes,
+  needs,
+  wants
+} from '../state'
 
 const el = ref<HTMLImageElement>()
 
 const props = defineProps<{
-  hall: Hall
-  games: Game[]
+  id: string
 }>()
 
+const imageUrl = computed(() => new URL(`../resources/hall${props.id}.jpg`, import.meta.url).href)
+
 const filteredGames = computed(() =>
-  props.games.filter(
+  (gamesByHall.value[props.id] ?? []).filter(
     (x) =>
       (needs.value || x.priority !== 'need') &&
       (wants.value || x.priority !== 'want') &&
@@ -50,16 +61,16 @@ onMounted(() => {
 
 function getFactor() {
   const parent = el.value!.getBoundingClientRect()
-  factor.value = parent.width / props.hall.width
+  factor.value = parent.width / halls[props.id].width
 }
 </script>
 
 <template>
   <div class="relative flex justify-center" ref="el">
-    <img src="../resources/hall3.jpg" />
-    <div v-if="info" class="absolute top-0 left-0 p-2">
-      <ul>
-        <li v-for="game in gameList" :class="`mb-2 p-1 bg-${game.color}`">
+    <img :src="imageUrl" />
+    <div v-if="info" class="absolute top-0 left-0 p-2 z-40">
+      <ul class="bg-white rounded">
+        <li v-for="game in gameList" :key="game.id" :class="`mb-2 p-1 rounded bg-${game.color}`">
           <strong>
             {{ game.name }}
           </strong>
@@ -72,9 +83,9 @@ function getFactor() {
         </li>
       </ul>
     </div>
-    <BoothToolView v-if="boothTool" :hall-id="hall.id" :factor="factor" />
+    <BoothToolView v-if="boothTool" :hall-id="id" :factor="factor" />
     <BoothView
-      v-for="booth in boothsByHall[hall.id]"
+      v-for="booth in boothsByHall[id]"
       :key="booth.id"
       :booth="booth"
       :games="gamesByBooth[booth.id] ?? []"
