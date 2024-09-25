@@ -163,7 +163,7 @@ async function loadData() {
     </DisclosurePanel>
   </Disclosure>
   <main>
-    <div class="d-flex p-2">
+    <!-- <div class="d-flex p-2">
       <input class="mr-2" type="text" placeholder="Tabletop ID" />
       <button
         type="button"
@@ -172,7 +172,7 @@ async function loadData() {
       >
         Load
       </button>
-    </div>
+    </div> -->
     <router-view v-slot="{ Component }">
       <keep-alive>
         <component :is="Component" />
@@ -180,3 +180,6 @@ async function loadData() {
     </router-view>
   </main>
 </template>
+<style>
+@import 'vue-draggable-resizable/style.css';
+</style>
