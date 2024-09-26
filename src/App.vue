@@ -20,7 +20,11 @@ import { useRoute } from 'vue-router'
 const navigation = computed(() =>
   Object.values(halls)
     .sort((a, b) => a.id.localeCompare(b.id))
-    .map((x) => ({ name: 'Hall ' + x.id, route: x.id, count: gamesByHall.value[x.id]?.length }))
+    .map((x) => ({
+      name: 'Hall ' + x.id,
+      route: '/hall/' + x.id,
+      count: gamesByHall.value[x.id]?.length
+    }))
 )
 
 onMounted(() => {

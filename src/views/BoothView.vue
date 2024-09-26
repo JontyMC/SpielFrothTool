@@ -15,6 +15,9 @@ const props = defineProps<{
 const factoredBooth = computed(() => {
   const factor = props.factor
   let { x, y, width, height } = props.booth
+  if (props.booth.id === '3-F113') {
+    console.log('factoredBooth', x, y, x * factor, y * factor)
+  }
   width = width * factor
   height = height * factor
   x = x * factor
@@ -45,6 +48,12 @@ const style = computed(() => {
 <template>
   <div class="absolute top-0 left-0 w-full h-full">
     <div v-if="boothTool" ref="el" class="absolute border-2 border-red-600" :style="style"></div>
-    <GameView v-for="game of games" :game="game" :anchor="factoredBooth.center" :factor="factor" />
+    <GameView
+      v-for="(game, index) of games"
+      :game="game"
+      :anchor="factoredBooth.center"
+      :index="index"
+      :factor="factor"
+    />
   </div>
 </template>

@@ -12,6 +12,7 @@ export type Game = {
   src: string
   position?: Position
   srcInit: boolean
+  index: number
 }
 
 export type Position = {

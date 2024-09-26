@@ -60,12 +60,26 @@ export async function loadGames(api: boolean) {
   const localGames = arrayToEntityDict(localGamesArray)
   if (api) {
     const apiGames = await loadGamesFromApi()
-    const mergedGames = apiGames.map((game) => {
-      const localGame = localGames[game.id]
-      const position = localGame?.position ?? getInitPosition(game.boothId)
-      const srcInit = localGame?.srcInit ?? false
-      return { ...game, position, color: priorityToColor(game.priority), srcInit }
-    })
+    const mergedGames = apiGames
+      .sort((a, b) => a.name.localeCompare(b.name))
+      .reduce(
+        (acc, game) => {
+          const localGame = localGames[game.id]
+          const srcInit = localGame?.srcInit ?? false
+          const index = (acc.count[game.boothId] ?? -1) + 1
+          const position = localGame?.position ?? getInitPosition(game.boothId, index)
+          acc.count[game.boothId] = index
+          acc.games.push({
+            ...game,
+            position,
+            color: priorityToColor(game.priority),
+            srcInit,
+            index
+          })
+          return acc
+        },
+        <{ count: { [boothId: string]: number }; games: Game[] }>{ count: {}, games: [] }
+      ).games
     games.value = arrayToEntityDict(mergedGames)
   } else {
     games.value = localGames
@@ -87,7 +101,7 @@ async function loadGamesFromApi() {
 export function resetGames() {
   const saveGames = Object.values(games.value).map((x) => ({
     ...x,
-    position: getInitPosition(x.boothId),
+    position: getInitPosition(x.boothId, x.index),
     srcInit: false
   }))
   games.value = arrayToEntityDict(saveGames)
@@ -128,10 +142,18 @@ export function arrayToEntityDict<T extends { id: string }>(array: T[]) {
   }, <EntityDict<T>>{})
 }
 
-function getInitPosition(boothId: string) {
-  const { x, y } = booths[boothId] ?? {}
-  if (x && y) {
-    return { x: x + 120, y: y - 60, width: 150, height: 150 }
+const defaultSize = 180
+const radiusIncrement = defaultSize * 1.3
+const itemsOnCircle = 5
+const startAngle = -(1.8 * Math.PI) / itemsOnCircle
+function getInitPosition(boothId: string, index: number) {
+  const booth = booths[boothId] ?? {}
+  if (booth) {
+    const radius = radiusIncrement * (Math.floor(index / itemsOnCircle) + 1)
+    const angle = startAngle + (2 * Math.PI * index) / itemsOnCircle
+    const x = booth.x + booth.width / 2 + radius * Math.cos(angle)
+    const y = booth.y + booth.height / 2 + radius * Math.sin(angle)
+    return { x, y, width: defaultSize, height: defaultSize }
   }
 }
 
