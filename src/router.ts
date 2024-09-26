@@ -7,11 +7,14 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      redirect: (x) => ({ name: 'hall', params: { id: x.params.id }, query: { u: x.params.u } })
+      redirect: (x) => ({
+        name: 'hall',
+        params: { id: '3' },
+        query: { u: x.params.u }
+      })
     },
     { name: 'hall', path: '/hall/:id', component: HallView, props: true }
   ]
 })
 
 export default router
-//http://localhost:5173/hall/2?u=3ec71aebba638f3296802760cf3c6ff7

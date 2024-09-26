@@ -38,7 +38,7 @@ onMounted(() => {
   if (u) {
     userId.value = u
   }
-  loadGames(false)
+  loadGames(true)
 })
 
 const route = useRoute()
@@ -100,7 +100,7 @@ function getUnknownBooths() {
               <RouterLink
                 v-for="item in navigation"
                 :key="item.name"
-                :to="{ name: 'hall', params: { id: item.id }, query: { u: userId } }"
+                :to="{ name: 'hall', params: { id: item.id ?? '3' }, query: { u: userId } }"
                 class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
                 activeClass="bg-gray-900 text-white"
               >
@@ -152,7 +152,7 @@ function getUnknownBooths() {
           v-for="item in navigation"
           :key="item.name"
           as="RouterLink"
-          :to="{ name: 'hall', params: { id: item.id }, query: { u: userId } }"
+          :to="{ name: 'hall', params: { id: item.id ?? '3' }, query: { u: userId } }"
           class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
           activeClass="bg-gray-900 text-white"
         >

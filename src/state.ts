@@ -235,7 +235,7 @@ export function arrayToEntityDict<T extends { id: string }>(array: T[]) {
   }, <EntityDict<T>>{})
 }
 
-export const defaultSize = 220
+export const defaultSize = 200
 const radiusIncrement = defaultSize * 1.3
 const itemsOnCircle = 5
 const startAngle = -(1.8 * Math.PI) / itemsOnCircle
