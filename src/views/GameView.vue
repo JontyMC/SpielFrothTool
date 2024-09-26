@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { Game, Position } from '../model'
-import { imagePrefix } from '../state'
+import { imagePrefix, defaultSize } from '../state'
 
 const props = defineProps<{
   game: Game
@@ -41,7 +41,7 @@ onMounted(() => {
     img.src = imagePrefix + props.game.src
 
     img.onload = () => {
-      const defaultWidth = 150 * props.factor
+      const defaultWidth = defaultSize * props.factor
       const ratio = img.naturalWidth / img.naturalHeight
       const width = ratio <= 1 ? defaultWidth * ratio : defaultWidth
       const height = ratio >= 1 ? defaultWidth * ratio : defaultWidth

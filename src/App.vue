@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/vue'
 import { Bars3Icon, WrenchIcon, PrinterIcon, XMarkIcon } from '@heroicons/vue/24/outline'
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, watch } from 'vue'
 import {
+  booths,
   boothTool,
   gamesByHall,
   halls,
@@ -16,13 +17,14 @@ import {
   wants
 } from './state'
 import { useRoute } from 'vue-router'
+import router from './router'
 
 const navigation = computed(() =>
   Object.values(halls)
     .sort((a, b) => a.id.localeCompare(b.id))
     .map((x) => ({
       name: 'Hall ' + x.id,
-      route: '/hall/' + x.id,
+      id: x.id,
       count: gamesByHall.value[x.id]?.length
     }))
 )
@@ -31,12 +33,20 @@ onMounted(() => {
   if (window.innerWidth > 1200 && !localStorage.getItem('info')) {
     info.value = true
   }
-  userId.value = '1990e9fa56c4e74f80b0e6819775d98f'
+  const urlParams = new URLSearchParams(window.location.search)
+  const u = urlParams.get('u')
+  if (u) {
+    userId.value = u
+  }
   loadGames(false)
 })
 
 const route = useRoute()
 const gameCount = computed(() => gamesByHall.value[route.params.id as string]?.length)
+
+watch(userId, (value) => {
+  router.push({ ...route, query: { u: value } })
+})
 
 function print() {
   window.open(
@@ -47,6 +57,18 @@ function print() {
 
 function toggleBoothTool() {
   boothTool.value = !boothTool.value
+}
+
+function getUnknownBooths() {
+  const txt = Array.from(
+    new Set(
+      (gamesByHall.value[route.params.id as string] ?? [])
+        .filter((x) => !booths[x.boothId])
+        .map((x) => x.boothId)
+        .sort((a, b) => a.localeCompare(b))
+    )
+  ).join('\n//')
+  navigator.clipboard.writeText('//' + txt)
 }
 </script>
 
@@ -78,7 +100,7 @@ function toggleBoothTool() {
               <RouterLink
                 v-for="item in navigation"
                 :key="item.name"
-                :to="item.route"
+                :to="{ name: 'hall', params: { id: item.id }, query: { u: userId } }"
                 class="text-gray-300 hover:bg-gray-700 hover:text-white rounded-md px-3 py-2 text-sm font-medium"
                 activeClass="bg-gray-900 text-white"
               >
@@ -112,6 +134,14 @@ function toggleBoothTool() {
             <span class="absolute -inset-1.5" />
             <WrenchIcon class="h-6 w-6" aria-hidden="true" />
           </button>
+          <button
+            type="button"
+            v-if="boothTool"
+            @click.prevent="getUnknownBooths()"
+            class="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
+          >
+            Get Unknown Booths
+          </button>
         </div>
       </div>
     </div>
@@ -122,7 +152,7 @@ function toggleBoothTool() {
           v-for="item in navigation"
           :key="item.name"
           as="RouterLink"
-          :to="item.route"
+          :to="{ name: 'hall', params: { id: item.id }, query: { u: userId } }"
           class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
           activeClass="bg-gray-900 text-white"
         >

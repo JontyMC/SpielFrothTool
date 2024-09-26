@@ -27,10 +27,9 @@ watch(pressed, (value) => {
     y = Math.round(y / factor)
     width = Math.round(width / factor)
     height = Math.round(height / factor)
-    console.log(
-      'pressed',
-      `{ id: '${props.hallId}-', hallId: '${props.hallId}', x: ${x}, y: ${y}, height: ${height}, width: ${width} }`
-    )
+    const json = `{ id: '${props.hallId}-', hallId: '${props.hallId}', x: ${x}, y: ${y}, height: ${height}, width: ${width} }`
+    console.log('BOOTH JSON', json)
+    navigator.clipboard.writeText(json)
   }
 })
 
@@ -65,6 +64,6 @@ onMounted(() => {
 <template>
   <canvas
     ref="el"
-    class="absolute top-0 left-0 w-full h-full z-50 border-4 border-fuchsia-500"
+    class="absolute top-0 left-0 w-full h-full z-40 border-4 border-fuchsia-500"
   ></canvas>
 </template>
