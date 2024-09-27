@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { Game, Position } from '../model'
-import { imagePrefix, defaultSize } from '../state'
+import { imagePrefix, getDefaultSize } from '../state'
 
 const props = defineProps<{
   game: Game
@@ -9,7 +9,7 @@ const props = defineProps<{
   factor: number
 }>()
 
-const position = ref<Position>({ x: 1001, y: 100, width: 100, height: 100 })
+const position = ref<Position>({ x: 100, y: 100, width: 100, height: 100 })
 const factoredPosition = computed(() => ({
   x: position.value!.x * props.factor,
   y: position.value!.y * props.factor,
@@ -41,7 +41,7 @@ onMounted(() => {
     img.src = imagePrefix + props.game.src
 
     img.onload = () => {
-      const defaultWidth = defaultSize * props.factor
+      const defaultWidth = getDefaultSize(props.game) * props.factor
       const ratio = img.naturalWidth / img.naturalHeight
       const width = ratio <= 1 ? defaultWidth * ratio : defaultWidth
       const height = ratio >= 1 ? defaultWidth * ratio : defaultWidth

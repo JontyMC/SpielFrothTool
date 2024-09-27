@@ -70,6 +70,10 @@ function getUnknownBooths() {
   ).join('\n//')
   navigator.clipboard.writeText('//' + txt)
 }
+
+function nav(id: string) {
+  router.push({ name: 'hall', params: { id: id ?? '3' }, query: { u: userId.value } })
+}
 </script>
 
 <template>
@@ -151,10 +155,10 @@ function getUnknownBooths() {
         <DisclosureButton
           v-for="item in navigation"
           :key="item.name"
-          as="RouterLink"
-          :to="{ name: 'hall', params: { id: item.id ?? '3' }, query: { u: userId } }"
-          class="text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium"
-          activeClass="bg-gray-900 text-white"
+          @click="nav(item.id)"
+          :class="`text-gray-300 hover:bg-gray-700 hover:text-white block rounded-md px-3 py-2 text-base font-medium ${
+            route.params.id === item.id ? 'bg-gray-900 text-white' : ''
+          }`"
         >
           {{ item.name }}
         </DisclosureButton>
