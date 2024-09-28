@@ -138,6 +138,7 @@ export const info = useStorage('info', false, undefined, { writeDefaults: false 
 export const needs = ref(true)
 export const wants = ref(true)
 export const likes = ref(true)
+export const editingEnabled = ref(true)
 
 export async function loadGames(api: boolean) {
     if (!userId.value) {
@@ -221,6 +222,24 @@ export const boothsByHall = computed(() =>
 
 export const gamesByHall = computed(() =>
     Object.values(games.value).reduce((acc, game) => {
+        const games = acc[game.hallId] ?? []
+        games.push(game)
+        acc[game.hallId] = games
+        return acc
+    }, <{ [hallId: string]: Game[] }>{})
+)
+
+export const filteredGames = computed(() =>
+    Object.values(games.value).filter(
+        (x) =>
+            (needs.value || x.priority !== 'need') &&
+            (wants.value || x.priority !== 'want') &&
+            (likes.value || x.priority !== 'like')
+    )
+)
+
+export const gamesByHallFiltered = computed(() =>
+    Object.values(filteredGames.value).reduce((acc, game) => {
         const games = acc[game.hallId] ?? []
         games.push(game)
         acc[game.hallId] = games

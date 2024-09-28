@@ -4,17 +4,7 @@ import { Game, priorityOrder } from '../model'
 import BoothView from './BoothView.vue'
 import BoothToolView from './BoothToolView.vue'
 import { useResizeObserver } from '@vueuse/core'
-import {
-  booths,
-  boothsByHall,
-  boothTool,
-  gamesByHall,
-  halls,
-  info,
-  likes,
-  needs,
-  wants
-} from '../state'
+import { booths, boothsByHall, boothTool, halls, info, gamesByHallFiltered } from '../state'
 
 const el = ref<HTMLImageElement>()
 
@@ -24,17 +14,10 @@ const props = defineProps<{
 
 const imageUrl = computed(() => new URL(`../resources/hall${props.id}.jpg`, import.meta.url).href)
 
-const filteredGames = computed(() =>
-  (gamesByHall.value[props.id] ?? []).filter(
-    (x) =>
-      (needs.value || x.priority !== 'need') &&
-      (wants.value || x.priority !== 'want') &&
-      (likes.value || x.priority !== 'like')
-  )
-)
+const gamesForHall = computed(() => gamesByHallFiltered.value[props.id] ?? [])
 
 const gamesByBooth = computed(() =>
-  filteredGames.value.reduce((acc, curr) => {
+  gamesForHall.value.reduce((acc, curr) => {
     const games = acc[curr.boothId] ?? []
     games.push(curr)
     acc[curr.boothId] = games
@@ -42,7 +25,7 @@ const gamesByBooth = computed(() =>
   }, <{ [id: string]: Game[] }>{})
 )
 const gameList = computed(() =>
-  filteredGames.value
+  gamesForHall.value
     .sort((a, b) => {
       if (a.priority === b.priority) {
         return a.name.localeCompare(b.name)

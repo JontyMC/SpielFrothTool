@@ -5,7 +5,7 @@ import { computed, onMounted, watch } from 'vue'
 import {
   booths,
   boothTool,
-  gamesByHall,
+  gamesByHallFiltered,
   halls,
   info,
   likes,
@@ -14,7 +14,8 @@ import {
   resetGames,
   saveGames,
   userId,
-  wants
+  wants,
+  editingEnabled
 } from './state'
 import { useRoute } from 'vue-router'
 import router from './router'
@@ -25,7 +26,7 @@ const navigation = computed(() =>
     .map((x) => ({
       name: 'Hall ' + x.id,
       id: x.id,
-      count: gamesByHall.value[x.id]?.length
+      count: gamesByHallFiltered.value[x.id]?.length
     }))
 )
 
@@ -42,7 +43,7 @@ onMounted(() => {
 })
 
 const route = useRoute()
-const gameCount = computed(() => gamesByHall.value[route.params.id as string]?.length)
+const gameCount = computed(() => gamesByHallFiltered.value[route.params.id as string]?.length)
 
 watch(userId, (value) => {
   router.push({ ...route, query: { u: value } })
@@ -62,7 +63,7 @@ function toggleBoothTool() {
 function getUnknownBooths() {
   const txt = Array.from(
     new Set(
-      (gamesByHall.value[route.params.id as string] ?? [])
+      (gamesByHallFiltered.value[route.params.id as string] ?? [])
         .filter((x) => !booths[x.boothId])
         .map((x) => x.boothId)
         .sort((a, b) => a.localeCompare(b))
@@ -166,7 +167,7 @@ function nav(id: string) {
     </DisclosurePanel>
   </Disclosure>
   <main>
-    <div class="flex flex-wrap justify-center align-center p-2 mb-2">
+    <div class="flex flex-wrap justify-center align-center p-2 mb-2 gap-y-2">
       <label class="inline-flex items-center cursor-pointer mr-3">
         <input type="checkbox" v-model="info" class="sr-only peer" />
         <div
@@ -174,6 +175,15 @@ function nav(id: string) {
         ></div>
         <span class="ms-1 text-sm font-medium text-gray-900 dark:text-gray-300">
           Game Info ({{ gameCount ?? 0 }} games)
+        </span>
+      </label>
+      <label class="inline-flex items-center cursor-pointer mr-3">
+        <input type="checkbox" v-model="editingEnabled" class="sr-only peer" />
+        <div
+          class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
+        ></div>
+        <span class="ms-1 text-sm font-medium text-gray-900 dark:text-gray-300">
+          Enable Editing
         </span>
       </label>
       <input class="mr-2" type="text" v-model="userId" placeholder="Tabletop Together ID" />

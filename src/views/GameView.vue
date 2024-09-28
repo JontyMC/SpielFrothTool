@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from 'vue'
 import { Game, Position } from '../model'
-import { imagePrefix, getDefaultSize } from '../state'
+import { imagePrefix, getDefaultSize, editingEnabled } from '../state'
 
 const props = defineProps<{
   game: Game
@@ -88,13 +88,17 @@ const style = computed(() => ({
     <line :x1="anchor.x" :y1="anchor.y" :x2="lineEnding.x" :y2="lineEnding.y" stroke-width="4" />
   </svg>
   <vue-draggable-resizable
+    :draggable="editingEnabled"
+    :resizable="editingEnabled"
     @drag="drag"
     @resize="resize"
     :x="factoredPosition.x"
     :y="factoredPosition.y"
     :w="factoredPosition.width"
     :h="factoredPosition.height"
-    :class-name="`absolute border-4 rounded bg-${game.color} border-${game.color} bg-cover bg-center bg-no-repeat p-2`"
+    :class-name="`absolute border-${factor < 0.5 ? 2 : 4} rounded bg-${game.color} border-${
+      game.color
+    } bg-cover bg-center bg-no-repeat p-2`"
     :style="style"
   ></vue-draggable-resizable>
 </template>
