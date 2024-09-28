@@ -15,7 +15,8 @@ import {
   saveGames,
   userId,
   wants,
-  editingEnabled
+  editingEnabled,
+  filteredGames
 } from './state'
 import { useRoute } from 'vue-router'
 import router from './router'
@@ -43,7 +44,7 @@ onMounted(() => {
 })
 
 const route = useRoute()
-const gameCount = computed(() => gamesByHallFiltered.value[route.params.id as string]?.length)
+const totalCount = computed(() => filteredGames.value.length)
 
 watch(userId, (value) => {
   router.push({ ...route, query: { u: value } })
@@ -99,6 +100,12 @@ function nav(id: string) {
               src="https://www.spiel-essen.de/templates/yootheme/cache/b6/Logo_Spiel_Essen_hellesGrau-b6f0b14a.webp"
               alt="Your Company"
             />
+            <span
+              v-if="totalCount > 0"
+              class="inline-flex items-center justify-center w-4 h-4 ms-2 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full"
+            >
+              {{ totalCount }}
+            </span>
           </div>
           <div class="hidden sm:ml-6 sm:block">
             <div class="flex space-x-4">
@@ -162,6 +169,12 @@ function nav(id: string) {
           }`"
         >
           {{ item.name }}
+          <span
+            v-if="item.count > 0"
+            class="inline-flex items-center justify-center w-4 h-4 ms-2 text-xs font-semibold text-blue-800 bg-blue-200 rounded-full"
+          >
+            {{ item.count }}
+          </span>
         </DisclosureButton>
       </div>
     </DisclosurePanel>
@@ -173,9 +186,7 @@ function nav(id: string) {
         <div
           class="relative w-11 h-6 bg-gray-200 rounded-full peer peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 dark:bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"
         ></div>
-        <span class="ms-1 text-sm font-medium text-gray-900 dark:text-gray-300">
-          Game Info ({{ gameCount ?? 0 }} games)
-        </span>
+        <span class="ms-1 text-sm font-medium text-gray-900 dark:text-gray-300">Game Info</span>
       </label>
       <label class="inline-flex items-center cursor-pointer mr-3">
         <input type="checkbox" v-model="editingEnabled" class="sr-only peer" />

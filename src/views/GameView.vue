@@ -96,9 +96,9 @@ const style = computed(() => ({
     :y="factoredPosition.y"
     :w="factoredPosition.width"
     :h="factoredPosition.height"
-    :class-name="`absolute border-${factor < 0.5 ? 2 : 4} rounded bg-${game.color} border-${
+    :class-name="`absolute border${factor < 0.25 ? '' : factor < 0.6 ? '-2' : '-4'} rounded bg-${
       game.color
-    } bg-cover bg-center bg-no-repeat p-2`"
+    } border-${game.color} bg-cover bg-center bg-no-repeat p-2`"
     :style="style"
   ></vue-draggable-resizable>
 </template>
