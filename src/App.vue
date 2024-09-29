@@ -40,7 +40,7 @@ onMounted(() => {
   if (u) {
     userId.value = u
   }
-  loadGames(true)
+  loadGames()
 })
 
 const route = useRoute()
@@ -200,7 +200,7 @@ function nav(id: string) {
       <input class="mr-2" type="text" v-model="userId" placeholder="Tabletop Together ID" />
       <button
         type="button"
-        @click="loadGames(true)"
+        @click="loadGames()"
         class="mr-2 text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800"
       >
         Load

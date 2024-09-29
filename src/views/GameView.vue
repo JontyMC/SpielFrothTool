@@ -85,7 +85,13 @@ const style = computed(() => ({
 
 <template>
   <svg height="100%" width="100%" :class="`absolute stroke-${game.color}`">
-    <line :x1="anchor.x" :y1="anchor.y" :x2="lineEnding.x" :y2="lineEnding.y" stroke-width="4" />
+    <line
+      :x1="anchor.x"
+      :y1="anchor.y"
+      :x2="lineEnding.x"
+      :y2="lineEnding.y"
+      :stroke-width="factor < 0.25 ? 1 : factor < 0.6 ? 2 : 4"
+    />
   </svg>
   <vue-draggable-resizable
     :draggable="editingEnabled"
@@ -96,9 +102,9 @@ const style = computed(() => ({
     :y="factoredPosition.y"
     :w="factoredPosition.width"
     :h="factoredPosition.height"
-    :class-name="`absolute border${factor < 0.25 ? '' : factor < 0.6 ? '-2' : '-4'} rounded bg-${
-      game.color
-    } border-${game.color} bg-cover bg-center bg-no-repeat p-2`"
+    :class-name="`flex align-center justify-center absolute border${
+      factor < 0.25 ? '' : factor < 0.6 ? '-2' : '-4'
+    } rounded bg-${game.color} border-${game.color} bg-cover bg-center bg-no-repeat p-2`"
     :style="style"
   ></vue-draggable-resizable>
 </template>

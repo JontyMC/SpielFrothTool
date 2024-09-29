@@ -120,7 +120,8 @@ const boothArray: Booth[] = [
     { id: '3-F411', hallId: '3', x: 1901, y: 2813, height: 111, width: 225 },
     { id: '3-S211', hallId: '3', x: 1465, y: 1139, height: 45, width: 164 },
     { id: '3-X112', hallId: '3', x: 1251, y: 328, height: 19, width: 156 },
-    { id: '5-F110', hallId: '5', x: 415, y: 923, height: 67, width: 205 }
+    { id: '5-F110', hallId: '5', x: 415, y: 923, height: 67, width: 205 },
+    { id: '2-C110', hallId: '2', x: 390, y: 1288, height: 277, width: 220 }
 ]
 const boothDupe = boothArray.find(
     (x, index) => boothArray.findIndex((y) => y.id === x.id) !== index
@@ -132,7 +133,7 @@ if (boothDupe) {
 export const userId = useStorage('userId', '')
 export const halls = arrayToEntityDict(hallArray)
 export const booths = arrayToEntityDict(boothArray)
-export const games = ref<EntityDict<Game>>({})
+const games = ref<EntityDict<Game>>({})
 export const boothTool = ref(false)
 export const info = useStorage('info', false, undefined, { writeDefaults: false })
 export const needs = ref(true)
@@ -140,7 +141,7 @@ export const wants = ref(true)
 export const likes = ref(true)
 export const editingEnabled = ref(true)
 
-export async function loadGames(api: boolean) {
+export async function loadGames() {
     if (!userId.value) {
         return
     }
@@ -148,32 +149,29 @@ export async function loadGames(api: boolean) {
         .filter(([key, _]) => key.startsWith(userId.value))
         .map(([_, x]) => JSON.parse(x))
     const localGames = arrayToEntityDict(localGamesArray)
-    if (api) {
-        const apiGames = await loadGamesFromApi()
-        const mergedGames = apiGames
-            .sort((a, b) => a.name.localeCompare(b.name))
-            .reduce(
-                (acc, game) => {
-                    const localGame = localGames[game.id]
-                    const srcInit = localGame?.srcInit ?? false
-                    const index = (acc.count[game.boothId] ?? -1) + 1
-                    const position = localGame?.position ?? getInitPosition(game.boothId, index)
-                    acc.count[game.boothId] = index
-                    acc.games.push({
-                        ...game,
-                        position,
-                        color: priorityToColor(game.priority),
-                        srcInit,
-                        index
-                    })
-                    return acc
-                },
-                <{ count: { [boothId: string]: number }; games: Game[] }>{ count: {}, games: [] }
-            ).games
-        games.value = arrayToEntityDict(mergedGames)
-    } else {
-        games.value = localGames
-    }
+    const apiGames = await loadGamesFromApi()
+    const mergedGames = apiGames
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .reduce(
+            (acc, game) => {
+                const localGame = localGames[game.id]
+                const srcInit = localGame?.srcInit ?? false
+                const index = (acc.count[game.boothId] ?? -1) + 1
+                const position = localGame?.position ?? getInitPosition(game.boothId, index)
+                acc.count[game.boothId] = index
+                acc.games.push({
+                    ...game,
+                    position,
+                    color: priorityToColor(game.priority),
+                    srcInit,
+                    index,
+                    frothed: localGame?.frothed
+                })
+                return acc
+            },
+            <{ count: { [boothId: string]: number }; games: Game[] }>{ count: {}, games: [] }
+        ).games
+    games.value = arrayToEntityDict(mergedGames)
 }
 
 async function loadGamesFromApi() {
@@ -199,6 +197,13 @@ export function resetGames() {
         srcInit: false
     }))
     games.value = arrayToEntityDict(saveGames)
+}
+
+export function toggleFroth(gam1e: Game) {
+    const game = games.value[gam1e.id]
+    game.frothed = !game.frothed
+    localStorage.setItem(game.id, JSON.stringify(game))
+    games.value = { ...games.value }
 }
 
 export function saveGames() {
@@ -227,6 +232,17 @@ export const gamesByHall = computed(() =>
         acc[game.hallId] = games
         return acc
     }, <{ [hallId: string]: Game[] }>{})
+)
+
+export const gamesByBooth = computed(() =>
+    filteredGames.value.reduce((acc, game) => {
+        if (!game.frothed) {
+            const games = acc[game.boothId] ?? []
+            games.push(game)
+            acc[game.boothId] = games
+        }
+        return acc
+    }, <{ [boothId: string]: Game[] }>{})
 )
 
 export const filteredGames = computed(() =>

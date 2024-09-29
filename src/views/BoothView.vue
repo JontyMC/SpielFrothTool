@@ -1,14 +1,13 @@
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, ref } from 'vue'
 import GameView from './GameView.vue'
-import { Booth, Game } from '../model'
-import { boothTool } from '../state'
+import { Booth } from '../model'
+import { boothTool, gamesByBooth } from '../state'
 
 const el = ref<HTMLDivElement[]>()
 
 const props = defineProps<{
   booth: Booth
-  games: Game[]
   factor: number
 }>()
 
@@ -40,6 +39,8 @@ const style = computed(() => {
     height: `${height}px`
   }
 })
+
+const games = computed(() => gamesByBooth.value[props.booth.id] ?? [])
 </script>
 
 <template>
